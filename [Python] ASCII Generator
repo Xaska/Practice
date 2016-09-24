@@ -1,0 +1,54 @@
+from PIL import Image
+import argparse
+
+# to process the Command-line argument
+parser = argparse.ArgumentParser()
+
+parser.add_argument('file')     # input file
+parser.add_argument('-o', '--output')   # out put file
+parser.add_argument('--width', type = int, default = 80) # the width of the output result
+parser.add_argument('--height', type = int, default = 80) # the height of the output result
+
+# obtain parameters
+args = parser.parse_args()
+
+IMG = args.file
+WIDTH = args.width
+HEIGHT = args.height
+OUTPUT = args.output
+
+ascii_char = list("$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\|()1{}[]?-_+~<>i!lI;:,\"^`'. ")
+
+# to reflect the gray level on the list of characters
+def get_char(r,g,b,alpha = 256):
+    if alpha == 0:
+        return ' '
+    length = len(ascii_char)
+    gray = int(0.2126 * r + 0.7152 * g + 0.0722 * b)
+
+    unit = (256.0 + 1)/length
+    return ascii_char[int(gray/unit)]
+
+# the 'if __name__ == '__main__':' make Python files can act as either reusable modules, or as standalone programs
+if __name__ == '__main__':
+
+    im = Image.open(IMG)
+    im = im.resize((WIDTH,HEIGHT), Image.NEAREST)
+
+    txt = ""
+
+    for i in range(HEIGHT):
+        for j in range(WIDTH):
+            txt += get_char(*im.getpixel((j,i)))
+        txt += '\n'
+
+    print(txt)
+
+    # output the painting to a file
+    # 'with' allows you to ensure that a resource is "cleaned up" when the code that uses it finishes running, even if exceptions are thrown.
+    if OUTPUT:
+        with open(OUTPUT,'w') as f:
+            f.write(txt)
+    else:
+        with open("output.txt",'w') as f:
+            f.write(txt)
